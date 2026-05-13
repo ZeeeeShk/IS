@@ -1,31 +1,72 @@
-/*Write a Java/C/C++/Python program to implement DES algorithm.*/
+package exp1;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESKeySpec;
-import java.util.Base64;
+import java.util.Scanner;
 
-public class Main {
-    public static void main(String[] args) throws Exception {
-        String plainText = "Hello World";
-        String keyStr = "12345678"; // DES key must be 8 bytes
+public class SimpleDES {
 
-        DESKeySpec keySpec = new DESKeySpec(keyStr.getBytes());
-        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
-        SecretKey key = keyFactory.generateSecret(keySpec);
+    // XOR Function
+    static String xorStrings(String a, String b) {
 
-        Cipher cipher = Cipher.getInstance("DES");
+        String result = "";
+
+        for (int i = 0; i < a.length(); i++) {
+            result += (char)(a.charAt(i) ^ b.charAt(i));
+        }
+
+        return result;
+    }
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter 8 characters plaintext: ");
+        String text = sc.nextLine();
+
+        if (text.length() != 8) {
+
+            System.out.println("Error: Enter exactly 8 characters");
+            return;
+        }
+
+        System.out.println("Plain Text: " + text);
+
+        // Split into Left and Right blocks
+        String l0 = text.substring(0, 4);
+        String r0 = text.substring(4, 8);
+
+        System.out.println("Left Block (L0): " + l0);
+        System.out.println("Right Block (R0): " + r0);
+
+        // XOR Operation
+        String r1 = xorStrings(l0, r0);
+
+        System.out.print("XOR Result (ASCII): ");
+
+        for (char c : r1.toCharArray()) {
+            System.out.print((int)c + " ");
+        }
+
+        System.out.println();
 
         // Encryption
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encrypted = cipher.doFinal(plainText.getBytes());
-        String encText = Base64.getEncoder().encodeToString(encrypted);
-        System.out.println("Encrypted: " + encText);
+        String l1 = r0;
 
-        // Decryption
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        byte[] decrypted = cipher.doFinal(Base64.getDecoder().decode(encText));
-        System.out.println("Decrypted: " + new String(decrypted));
+        String cipher = l1 + r1;
+
+        System.out.println("\nEncrypted Cipher: " + cipher);
+
+        // -------- Decryption --------
+
+        String dl0 = cipher.substring(0, 4);
+        String dr0 = cipher.substring(4, 8);
+
+        String originalLeft = xorStrings(dl0, dr0);
+
+        String decrypted = originalLeft + dl0;
+
+        System.out.println("\nDecrypted Text: " + decrypted);
+
+        sc.close();
     }
 }
