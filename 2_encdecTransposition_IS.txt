@@ -1,99 +1,112 @@
-/*Write a Java/C/C++/Python program to perform encryption and decryption using the method of 
-the method of Transposition technique. */
+package exp1;
 
 import java.util.Scanner;
 
-public class Main {
-
-    static String text = "";
-    static String cipher = "";
-    static int key = 0;
+public class TranspositionCipher {
 
     // Encryption
-    static String encrypt(String text, int key) {
-        StringBuilder cipher = new StringBuilder();
+    static String encrypt(String text, int rails) {
 
-        for (int col = 0; col < key; col++) {
-            for (int i = col; i < text.length(); i += key) {
-                cipher.append(text.charAt(i));
-            }
+        if (rails == 1)
+            return text;
+
+        char[][] fence = new char[rails][text.length()];
+
+        int row = 0;
+        boolean down = false;
+
+        // Fill zig-zag pattern
+        for (int i = 0; i < text.length(); i++) {
+
+            fence[row][i] = text.charAt(i);
+
+            if (row == 0 || row == rails - 1)
+                down = !down;
+
+            row += down ? 1 : -1;
         }
-        return cipher.toString();
+
+        // Read row-wise
+        String cipher = "";
+
+        for (int i = 0; i < rails; i++)
+            for (int j = 0; j < text.length(); j++)
+                if (fence[i][j] != 0)
+                    cipher += fence[i][j];
+
+        return cipher;
     }
 
     // Decryption
-    static String decrypt(String cipher, int key) {
-        char[] text = new char[cipher.length()];
-        int index = 0;
+    static String decrypt(String cipher, int rails) {
 
-        for (int col = 0; col < key; col++) {
-            for (int i = col; i < cipher.length(); i += key) {
-                text[i] = cipher.charAt(index++);
-            }
+        if (rails == 1)
+            return cipher;
+
+        char[][] fence = new char[rails][cipher.length()];
+
+        int row = 0;
+        boolean down = false;
+
+        // Mark positions
+        for (int i = 0; i < cipher.length(); i++) {
+
+            fence[row][i] = '*';
+
+            if (row == 0 || row == rails - 1)
+                down = !down;
+
+            row += down ? 1 : -1;
         }
-        return new String(text);
+
+        // Fill cipher text
+        int k = 0;
+
+        for (int i = 0; i < rails; i++)
+            for (int j = 0; j < cipher.length(); j++)
+                if (fence[i][j] == '*')
+                    fence[i][j] = cipher.charAt(k++);
+
+        // Read zig-zag
+        String plain = "";
+
+        row = 0;
+        down = false;
+
+        for (int i = 0; i < cipher.length(); i++) {
+
+            plain += fence[row][i];
+
+            if (row == 0 || row == rails - 1)
+                down = !down;
+
+            row += down ? 1 : -1;
+        }
+
+        return plain;
     }
 
     public static void main(String[] args) {
+
         Scanner sc = new Scanner(System.in);
 
-        while (true) {
-            System.out.println("\nChoose an option:");
-            System.out.println("1) Enter Plain Text");
-            System.out.println("2) Enter Key");
-            System.out.println("3) Encrypt");
-            System.out.println("4) Decrypt");
-            System.out.println("5) Exit");
+        System.out.print("Enter Plain Text: ");
+        String text = sc.nextLine();
 
-            int choice = sc.nextInt();
-            sc.nextLine(); // consume newline
+        System.out.print("Enter Number of Rails: ");
+        int rails = sc.nextInt();
 
-            switch (choice) {
-                case 1:
-                    System.out.print("Enter plain text: ");
-                    text = sc.nextLine();
-                    break;
+        String cipher = encrypt(text, rails);
 
-                case 2:
-                    System.out.print("Enter key (numeric): ");
-                    key = sc.nextInt();
-                    break;
+        System.out.println("\nEncrypted Text: " + cipher);
 
-                case 3:
-                    if (text.isEmpty() || key <= 0) {
-                        System.out.println("Please enter valid text and key first.");
-                    } else {
-                        cipher = encrypt(text, key);
-                        System.out.println("Encrypted Text: " + cipher);
-                    }
-                    break;
+        String decrypted = decrypt(cipher, rails);
 
-                case 4:
-                    if (cipher.isEmpty() || key <= 0) {
-                        System.out.println("No cipher available. Encrypt first.");
-                    } else {
-                        String decrypted = decrypt(cipher, key);
-                        System.out.println("Decrypted Text: " + decrypted);
-                    }
-                    break;
+        System.out.println("Decrypted Text: " + decrypted);
 
-                case 5:
-                    System.out.println("Exiting...");
-                    sc.close();
-                    return;
-
-                default:
-                    System.out.println("Invalid choice.");
-            }
-        }
+        sc.close();
     }
 }
-
-
-1
-Hello World
-2
-2
-3
-4
-5
+//---------------------------------------------------------------------------------------
+//Enter Plain Text: hello
+//Enter Number of Rails: 3
